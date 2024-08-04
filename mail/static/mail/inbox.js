@@ -36,7 +36,6 @@ function load_mailbox(mailbox) {
 }
 
 function send_email(event) {
-  console.log("Form submitted");
   event.preventDefault();
 
   // Store fields
@@ -44,8 +43,6 @@ function send_email(event) {
   const subject = document.querySelector('#compose-subject').value;
   const body = document.querySelector('#compose-body').value;
 
-  console.log(recipients, subject, body);
-  console.log("Sending email...");
   // Send to backend
   fetch('/emails', {
     method: 'POST',
