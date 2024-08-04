@@ -40,9 +40,9 @@ function send_email(event) {
   event.preventDefault();
 
   // Store fields
-  const o = document.querySelector('#compose-recipients').value;
-  const d = document.querySelector('#compose-subject').value;
-  const r = document.querySelector('#compose-body').value;
+  const recipients = document.querySelector('#compose-recipients').value;
+  const subject = document.querySelector('#compose-subject').value;
+  const body = document.querySelector('#compose-body').value;
 
   console.log(recipients, subject, body);
   console.log("Sending email...");
@@ -50,9 +50,9 @@ function send_email(event) {
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
-        recipients: o,
-        subject: d,
-        body: r
+        recipients: recipients,
+        subject: subject,
+        body: body
     })
   })
   .then(response => response.json())
