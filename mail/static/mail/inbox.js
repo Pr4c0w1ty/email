@@ -44,48 +44,45 @@ function view_email(id) {
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
-    // Print email
     console.log(email);
 
-    // show email
     document.querySelector('#emails-view').style.display = 'none';
     document.querySelector('#compose-view').style.display = 'none';
     document.querySelector('#email-details-view').style.display = 'block';
 
     document.querySelector('#email-details-view').innerHTML = `
-    <ul class="list-group">
-      <li class="list-group-item"><strong>From:</strong> ${email.sender}</li>
-      <li class="list-group-item"><strong>To:</strong> ${email.recipients}</li>
-      <li class="list-group-item"><strong>Subject:</strong> ${email.subject}</li>
-      <li class="list-group-item"><strong>Timestamp:</strong> ${email.timestamp}</li>
-    </ul>
-
-    <button class="btn btn-sm btn-outline-primary" id="reply">Reply</button>
-    <button class="btn btn-sm btn-outline-primary" id="archive">${email.archived ? 'Unarchive' : 'Archive'}</button>
-    <p>${email.body}</p>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>From:</strong> ${email.sender}</li>
+        <li class="list-group-item"><strong>To:</strong> ${email.recipients}</li>
+        <li class="list-group-item"><strong>Subject:</strong> ${email.subject}</li>
+        <li class="list-group-item"><strong>Timestamp:</strong> ${email.timestamp}</li>
+        <button class="btn btn-sm btn-outline-primary" id="reply">Reply</button>
+        <button id="archivebtn">${email.archived ? 'Unarchive' : 'Archive'}</button>
+        <p>${email.body}</p>
+      </ul>
     `;
-    // change to read
+
     if (!email.read) {
       fetch(`/emails/${email.id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-            read: true
-        })
+        body: JSON.stringify({ read: true })
       });
     }
-    archive.className = email.archived ? "btn btn-danger" : "btn btn-warning";
-    archive.addEventListener('click', () => {
+
+    // Ensure the archive button is appended and event listener is added after the innerHTML is set
+    const archiveButton = document.getElementById('archivebtn');
+    archiveButton.className = email.archived ? "btn btn-danger" : "btn btn-warning";
+    archiveButton.addEventListener('click', () => {
       fetch(`/emails/${email.id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-            archived: !email.archived
-        })
+        body: JSON.stringify({ archived: !email.archived })
       })
-  });
-  document.querySelector('#email-details-view').append(archive);
+      .then(() => load_mailbox(email.archived ? 'inbox' : 'archive'));
+    });
+  })
+  .catch(error => console.error('Error:', error));
 }
-  );
-}
+
 
 
 function compose_email() {
@@ -109,27 +106,29 @@ function load_mailbox(mailbox) {
   document.querySelector('#email-details-view').style.display = 'none';
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
-
+  
   //  get emails for mailbox
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
       // loop
-      emails.forEach(oneEmail => {
+      console.log(emails);
+      emails.forEach(singleEmail => {
+        console.log(singleEmail);
+
         const newEmail = document.createElement('div');
         newEmail.className = "list-group-item";
-        newEmail.innerHTML = 
-        `
-        <h4>Sender: ${oneEmail.sender}</h4>
-        <h5>Subject: ${oneEmail.subject}</h5>
-        <p>${oneEmail.timestamp}</p>
+        newEmail.innerHTML = `
+        <h4>Sender: ${singleEmail.sender}</h4>
+        <h5>Subject: ${singleEmail.subject}</h5>
+        <p>${singleEmail.timestamp}</p>
         `;
         // change background color
-        newEmail.className = oneEmail.read ? "read" : "unread";
+        newEmail.className = singleEmail.read ? "read" : "unread";
 
         // add click event
         newEmail.addEventListener('click', function() {
-          view_email(oneEmail.id);
+          view_email(singleEmail.id);
         });
         document.querySelector('#emails-view').append(newEmail);
       });
