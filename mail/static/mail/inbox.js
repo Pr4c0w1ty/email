@@ -56,8 +56,9 @@ function view_email(id) {
         <li class="list-group-item"><strong>To:</strong> ${email.recipients}</li>
         <li class="list-group-item"><strong>Subject:</strong> ${email.subject}</li>
         <li class="list-group-item"><strong>Timestamp:</strong> ${email.timestamp}</li>
-        <button class="btn btn-sm btn-outline-primary" id="reply">Reply</button>
+        <button id="replybtn"></button>
         <button id="archivebtn">${email.archived ? 'Unarchive' : 'Archive'}</button>
+        
         <p>${email.body}</p>
       </ul>
     `;
@@ -68,6 +69,18 @@ function view_email(id) {
         body: JSON.stringify({ read: true })
       });
     }
+    // reply button
+    const replyButton = document.getElementById('replybtn');
+    replyButton.innerHTML = 'Reply';
+    replyButton.className = 'btn btn-success';
+    replyButton.addEventListener('click', () => {
+      compose_email();
+
+      document.querySelector('#compose-recipients').value = email.sender;
+      document.querySelector('#compose-subject').value = email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`;
+      document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
+    });
+    document.querySelector('#email-details-view').append(replyButton);
 
     // Ensure the archive button is appended and event listener is added after the innerHTML is set
     const archiveButton = document.getElementById('archivebtn');
@@ -80,8 +93,11 @@ function view_email(id) {
       .then(() => load_mailbox(email.archived ? 'inbox' : 'archive'));
     });
   })
-  .catch(error => console.error('Error:', error));
+  document.querySelector('#email-details-view').append(archiveButton);
+
+
 }
+
 
 
 
